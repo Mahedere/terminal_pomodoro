@@ -1,10 +1,12 @@
 const readline = require('readline');
+let currentInterval;
+let workDuration = 25 * 60;
+let shortBreakDuration = 15 * 60;
 function countdown(duration, type, next) {
     let remainingTime = duration;
-    const interval = setInterval(() => {
+   currentInterval = setInterval(() => {
         const minutes = Math.floor(remainingTime / 60);
         const seconds = remainingTime % 60;
-        console.clear();
         console.log(`${type}Time left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
         remainingTime--;
         if (remainingTime < 0) {
@@ -39,8 +41,27 @@ function startPomodoroCycle() {
     work();
 }
 function stopTimer() {
+    if(currentInterval){
     clearInterval(currentInterval);
     console.log("Timer Stopped");
+    }
+    else{
+        console.log('No active timer to stop')
+    }
+}
+
+function setCustomTimers() {
+    inputHandler.question('Set work duration (in minutes):', (work) => {
+        workDuration = parseInt(work) * 60;
+        inputHandler.question('Set short break duration (in minutes):', (shortBreak) => {
+            shortBreakDuration = parseInt(shortBreak) * 60;
+            inputHandler.question('Set long break duration (in minutes):', (longBreak) => {
+                longBreakDuration = parseInt(longBreak) * 60;
+                console.log('Custom durations has been set5 successfully!');
+                console.log(`Work Duration:${work} minutes, Short Break: ${shortBreak} minutes ,Long Break: ${longBreak} minutes`);
+            })
+        })
+    })
 }
 const inputHandler = readline.createInterface({
     input: process.stdin,
@@ -54,10 +75,12 @@ inputHandler.on('line', (input) => {
         case 'stop':
             stopTimer();
             break;
+        case 'set':
+            setCustomTimers();
+            break;
         case 'quit':
             inputHandler.close();
             process.exit();
-            break;
         default:
             console.log("Unknown Choose from:start,stop,quit")
     }
