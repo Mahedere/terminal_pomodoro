@@ -1,8 +1,8 @@
 const readline = require('readline');
 let currentInterval;
-let workDuration = 25 * 60;
-let shortBreakDuration = 15 * 60;
-let longBreakDuration = 30 * 60;
+let workDuration = 1* 60;
+let shortBreakDuration = 1 * 60;
+let longBreakDuration = 1 * 60;
 let cycleCount = 0;
 let inputHandler;
 
@@ -82,20 +82,20 @@ function handleCommands() {
             case 'start':
                 startPomodoroCycle();
                 break;
-            case 'stop':
+            case 's':
                 stopTimer();
                 break;
             case 'set':
                 setCustomTimers();
                 break;
-            case 'quit':
+            case 'q':
                 inputHandler.close();
                 process.exit();
             default:
-                console.log("\nUnknown command. Choose from: start, stop, set, quit");
+                console.log("\nUnknown command. Choose from: start, s to stop, q to quit");
         }
     });
 }
 
-console.log("Welcome! Type 'start', 'stop', 'set', or 'quit' to control the timer.");
+console.log("Welcome! Type 'start','set', 's' to stop, or 'q' to quit to control the timer.");
 handleCommands();
