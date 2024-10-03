@@ -2,11 +2,17 @@ const readline = require('readline');
 let currentInterval;
 let workDuration = 25 * 60;
 let shortBreakDuration = 15 * 60;
+// let clearIntervalCounter=0;
 function countdown(duration, type, next) {
     let remainingTime = duration;
    currentInterval = setInterval(() => {
         const minutes = Math.floor(remainingTime / 60);
         const seconds = remainingTime % 60;
+        // if(clearIntervalCounter % 5 ===0){
+        //     console.clear();
+        // }
+        // clearIntervalCounter
+    
         console.log(`${type}Time left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
         remainingTime--;
         if (remainingTime < 0) {
