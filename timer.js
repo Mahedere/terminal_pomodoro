@@ -1,11 +1,14 @@
 const readline = require('readline');
+const fs = require('fs');
 let currentInterval;
-let workDuration = 1* 60;
+let workDuration = 1 * 60;
 let shortBreakDuration = 1 * 60;
 let longBreakDuration = 1 * 60;
 let cycleCount = 0;
 let inputHandler;
-
+let totalWorkTime = 0;
+let totalBreakTime = 0;
+const historyFilePath = 'pomodoro_history.txt';
 function countdown(duration, type, next) {
     let remainingTime = duration;
     currentInterval = setInterval(() => {
@@ -26,6 +29,8 @@ function startPomodoroCycle() {
         console.log("\nWork interval started!");
         countdown(workDuration, "Work", () => {
             cycleCount++;
+            totalWorkTime += workDuration / 60;
+            saveSession('Work', workDuration);
             if (cycleCount % 4 === 0) {
                 longBreak();
             }
@@ -37,14 +42,21 @@ function startPomodoroCycle() {
 
     function shortBreak() {
         console.log("\nShort break started!");
-        countdown(shortBreakDuration, "Short Break", work);
+        countdown(shortBreakDuration, "Short Break", () => {
+            totalBreakTime += shortBreakDuration / 60;
+            saveSession('Short Break', shortBreakDuration);
+            work();
+        });
     }
 
     function longBreak() {
         console.log("\nLong break started!");
-        countdown(longBreakDuration, "Long Break", work);
+        countdown(longBreakDuration, "Long Break", () => {
+            totalBreakTime += longBreakDuration / 60;
+            saveSession('Long Break', longBreakDuration);
+            work();
+        });
     }
-
     work();
 }
 
@@ -56,7 +68,6 @@ function stopTimer() {
         console.log('\nNo active timer to stop');
     }
 }
-
 function setCustomTimers() {
     inputHandler.question('Set work duration (in minutes):', (work) => {
         workDuration = parseInt(work) * 60;
@@ -70,7 +81,30 @@ function setCustomTimers() {
         });
     });
 }
-
+function saveSession(type, duration) {
+    const date = new Date();
+    const sessionData = `${date.toLocaleString()}-${type} for ${Math.floor(duration / 60)}minutes\n`;
+    fs.appendFile(historyFilePath, sessionData, (err) => {
+        if (err) throw err;
+    })
+}
+function viewHistory() {
+    fs.readFile(historyFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.log('No session history found.');
+        }
+        else {
+            console.log('\nSession History:\n');
+            console.log(data);
+        }
+    })
+}
+function displayStatistics() {
+    console.log(`\nStatistics:`);
+    console.log(`Total Work Time: ${totalWorkTime} minutes`);
+    console.log(`Total Break Time: ${totalBreakTime} minutes`);
+    console.log(`Total Pomodoro Sessions Completed: ${cycleCount}`);
+}
 inputHandler = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -87,6 +121,12 @@ function handleCommands() {
                 break;
             case 'set':
                 setCustomTimers();
+                break;
+            case 'st':
+                displayStatistics();
+                break;
+            case 'h':
+                viewHistory();
                 break;
             case 'q':
                 inputHandler.close();
