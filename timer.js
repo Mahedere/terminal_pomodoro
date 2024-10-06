@@ -125,6 +125,18 @@ function handleCommands() {
             case 'st':
                 displayStatistics();
                 break;
+            case 'help':
+                console.log(`
+                Available commands:
+                - start: Start the Pomodoro cycle
+                - s: Stop the current timer
+                - set: Set custom durations for work, short break, and long break
+                - st: Display session statistics
+                - h: View session history
+                - help: View the list of available commands
+                - q: Quit the application
+                        `);
+                break;
             case 'h':
                 viewHistory();
                 break;
@@ -132,10 +144,10 @@ function handleCommands() {
                 inputHandler.close();
                 process.exit();
             default:
-                console.log("\nUnknown command. Choose from: start, s to stop, q to quit");
+                console.log("\nUnknown command.Type 'help' to see all available commands.");
         }
     });
 }
 
-console.log("Welcome! Type 'start','set', 's' to stop, or 'q' to quit to control the timer.");
+console.log("Welcome! Type 'start','set', 's' to stop, 'help' for available commands, or 'q' to quit.");
 handleCommands();
