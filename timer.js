@@ -8,10 +8,16 @@ let cycleCount = 0;
 let inputHandler;
 let totalWorkTime = 0;
 let totalBreakTime = 0;
+let remainingTime;
+let paused = false;
+let currentPhase;
 const historyFilePath = 'pomodoro_history.txt';
+
+// Countdown function
 function countdown(duration, type, next) {
-    let remainingTime = duration;
+    remainingTime = duration;
     currentInterval = setInterval(() => {
+        if (paused) return;
         const minutes = Math.floor(remainingTime / 60);
         const seconds = remainingTime % 60;
         process.stdout.write(`\r${type} Time left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
@@ -24,40 +30,98 @@ function countdown(duration, type, next) {
     }, 1000);
 }
 
+// Work, Short Break, and Long Break functions defined outside
+function work() {
+    console.log("\nWork interval started!");
+    currentPhase = 'Work';
+    countdown(workDuration, "Work", () => {
+        cycleCount++;
+        totalWorkTime += workDuration / 60;
+        saveSession('Work', workDuration);
+        if (cycleCount % 4 === 0) {
+            longBreak();
+        } else {
+            shortBreak();
+        }
+    });
+}
+
+function shortBreak() {
+    console.log("\nShort break started!");
+    currentPhase = 'Short Break';
+    countdown(shortBreakDuration, "Short Break", () => {
+        totalBreakTime += shortBreakDuration / 60;
+        saveSession('Short Break', shortBreakDuration);
+        work();
+    });
+}
+
+function longBreak() {
+    console.log("\nLong break started!");
+    currentPhase = 'Long Break';
+    countdown(longBreakDuration, "Long Break", () => {
+        totalBreakTime += longBreakDuration / 60;
+        saveSession('Long Break', longBreakDuration);
+        work();
+    });
+}
+
+// Start Pomodoro cycle
 function startPomodoroCycle() {
-    function work() {
-        console.log("\nWork interval started!");
-        countdown(workDuration, "Work", () => {
-            cycleCount++;
-            totalWorkTime += workDuration / 60;
-            saveSession('Work', workDuration);
-            if (cycleCount % 4 === 0) {
-                longBreak();
-            }
-            else {
-                shortBreak();
-            }
-        });
-    }
+    work(); // Initiates the first work cycle
+}
 
-    function shortBreak() {
-        console.log("\nShort break started!");
-        countdown(shortBreakDuration, "Short Break", () => {
-            totalBreakTime += shortBreakDuration / 60;
-            saveSession('Short Break', shortBreakDuration);
-            work();
-        });
+// Pause, resume, reset, stop, and set custom timers
+function pauseTimer() {
+    if (currentInterval) {
+        clearInterval(currentInterval);
+        paused = true;
+        console.log(`\nTimer Paused with ${Math.floor(remainingTime / 60)}:${remainingTime % 60} remaining`);
+    } else {
+        console.log("\nNo active timer to pause");
     }
+}
 
-    function longBreak() {
-        console.log("\nLong break started!");
-        countdown(longBreakDuration, "Long Break", () => {
-            totalBreakTime += longBreakDuration / 60;
-            saveSession('Long Break', longBreakDuration);
-            work();
+function resumeTimer() {
+    if (paused) {
+        console.log("\nResuming Timer...");
+        paused = false;
+        countdown(remainingTime, currentPhase, () => {
+            if (currentPhase === 'Work') {
+                cycleCount++;
+                totalWorkTime += workDuration / 60;
+                saveSession('Work', workDuration);
+                if (cycleCount % 4 === 0) {
+                    longBreak();
+                } else {
+                    shortBreak();
+                }
+            } else if (currentPhase === 'Short Break') {
+                totalBreakTime += shortBreakDuration / 60;
+                saveSession('Short Break', shortBreakDuration);
+                work();
+            } else if (currentPhase === 'Long Break') {
+                totalBreakTime += longBreakDuration / 60;
+                saveSession('Long Break', longBreakDuration);
+                work();
+            }
         });
+    } else {
+        console.log("\nNo paused timer to resume.");
     }
-    work();
+}
+
+function resetTimer() {
+    if (currentInterval) {
+        clearInterval(currentInterval);
+        console.log("\nTimer Reset.");
+    }
+    paused = false;
+    remainingTime = null;
+    cycleCount = 0;
+    totalWorkTime = 0;
+    totalBreakTime = 0;
+    console.log("Pomodoro cycle and statistics reset.");
 }
 
 function stopTimer() {
@@ -68,6 +132,7 @@ function stopTimer() {
         console.log('\nNo active timer to stop');
     }
 }
+
 function setCustomTimers() {
     inputHandler.question('Set work duration (in minutes):', (work) => {
         workDuration = parseInt(work) * 60;
@@ -81,30 +146,35 @@ function setCustomTimers() {
         });
     });
 }
+
+// Session history and statistics
 function saveSession(type, duration) {
     const date = new Date();
-    const sessionData = `${date.toLocaleString()}-${type} for ${Math.floor(duration / 60)}minutes\n`;
+    const sessionData = `${date.toLocaleString()} - ${type} for ${Math.floor(duration / 60)} minutes\n`;
     fs.appendFile(historyFilePath, sessionData, (err) => {
         if (err) throw err;
-    })
+    });
 }
+
 function viewHistory() {
     fs.readFile(historyFilePath, 'utf8', (err, data) => {
         if (err) {
             console.log('No session history found.');
-        }
-        else {
+        } else {
             console.log('\nSession History:\n');
             console.log(data);
         }
-    })
+    });
 }
+
 function displayStatistics() {
     console.log(`\nStatistics:`);
     console.log(`Total Work Time: ${totalWorkTime} minutes`);
     console.log(`Total Break Time: ${totalBreakTime} minutes`);
     console.log(`Total Pomodoro Sessions Completed: ${cycleCount}`);
 }
+
+// Command handling
 inputHandler = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -133,9 +203,21 @@ function handleCommands() {
                 - set: Set custom durations for work, short break, and long break
                 - st: Display session statistics
                 - h: View session history
+                - p: Pause the timer
+                - r: Resume the timer
+                - re: Reset the Pomodoro cycle and statistics
                 - help: View the list of available commands
                 - q: Quit the application
-                        `);
+                `);
+                break;
+            case 'p':
+                pauseTimer();
+                break;
+            case 'r':
+                resumeTimer();
+                break;
+            case 're':
+                resetTimer();
                 break;
             case 'h':
                 viewHistory();
@@ -144,10 +226,10 @@ function handleCommands() {
                 inputHandler.close();
                 process.exit();
             default:
-                console.log("\nUnknown command.Type 'help' to see all available commands.");
+                console.log("\nUnknown command. Type 'help' to see all available commands.");
         }
     });
 }
 
-console.log("Welcome! Type 'start','set', 's' to stop, 'help' for available commands, or 'q' to quit.");
+console.log("Welcome! Type 'start', 'set', 's' to stop, 'help' for available commands, or 'q' to quit.");
 handleCommands();
