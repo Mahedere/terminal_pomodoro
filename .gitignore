@@ -1,0 +1,12 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+
+# History file
+pomodoro_history.txt

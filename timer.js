@@ -1,7 +1,8 @@
 const readline = require('readline');
 const fs = require('fs');
+const notifier = require('node-notifier'); // Import Node Notifier
 let currentInterval;
-let workDuration = 1 * 60;
+let workDuration = 1 * 60; // Default durations in seconds
 let shortBreakDuration = 1 * 60;
 let longBreakDuration = 1 * 60;
 let cycleCount = 0;
@@ -12,7 +13,6 @@ let remainingTime;
 let paused = false;
 let currentPhase;
 const historyFilePath = 'pomodoro_history.txt';
-
 // Countdown function
 function countdown(duration, type, next) {
     remainingTime = duration;
@@ -25,15 +25,24 @@ function countdown(duration, type, next) {
         if (remainingTime < 0) {
             clearInterval(currentInterval);
             console.log(`\n${type} finished!`);
+            notifier.notify({ // Notification when the timer ends
+                title: `${type} Finished`,
+                message: `Your ${type.toLowerCase()} is complete!`,
+                sound: true // Play sound
+            });
             if (next) next();
         }
     }, 1000);
 }
-
-// Work, Short Break, and Long Break functions defined outside
+// Work, Short Break, and Long Break functions
 function work() {
     console.log("\nWork interval started!");
     currentPhase = 'Work';
+    notifier.notify({ // Notification when the work starts
+        title: 'Work Interval Started',
+        message: 'Get ready to focus!',
+        sound: true
+    });
     countdown(workDuration, "Work", () => {
         cycleCount++;
         totalWorkTime += workDuration / 60;
@@ -49,6 +58,11 @@ function work() {
 function shortBreak() {
     console.log("\nShort break started!");
     currentPhase = 'Short Break';
+    notifier.notify({ 
+        title: 'Short Break Started',
+        message: 'Take a short break!',
+        sound: true
+    });
     countdown(shortBreakDuration, "Short Break", () => {
         totalBreakTime += shortBreakDuration / 60;
         saveSession('Short Break', shortBreakDuration);
@@ -59,6 +73,11 @@ function shortBreak() {
 function longBreak() {
     console.log("\nLong break started!");
     currentPhase = 'Long Break';
+    notifier.notify({ 
+        title: 'Long Break Started',
+        message: 'Enjoy your long break!',
+        sound: true
+    });
     countdown(longBreakDuration, "Long Break", () => {
         totalBreakTime += longBreakDuration / 60;
         saveSession('Long Break', longBreakDuration);
@@ -128,10 +147,16 @@ function stopTimer() {
     if (currentInterval) {
         clearInterval(currentInterval);
         console.log("\nTimer Stopped");
+        notifier.notify({
+            title: 'Pomodoro Timer',
+            message: 'The timer has been stopped.',
+            sound: true, // Add a sound notification
+        });
     } else {
         console.log('\nNo active timer to stop');
     }
 }
+
 
 function setCustomTimers() {
     inputHandler.question('Set work duration (in minutes):', (work) => {
