@@ -9,7 +9,7 @@ let workDuration = 1 * 60;
 let shortBreakDuration = 1 * 60;
 let longBreakDuration = 1 * 60;
 let cycleCount = 0;
-let inputHandler;
+// let inputHandler;
 let totalWorkTime = 0;
 let totalBreakTime = 0;
 let remainingTime;
@@ -213,13 +213,13 @@ function stopTimer() {
  * Prompts the user for each duration.
  */
 function setCustomTimers() {
-  inputHandler.question("Set work duration (in minutes):", (work) => {
+  rl.question("Set work duration (in minutes):", (work) => {
     workDuration = parseInt(work) * 60;
-    inputHandler.question(
+    rl.question(
       "Set short break duration (in minutes):",
       (shortBreak) => {
         shortBreakDuration = parseInt(shortBreak) * 60;
-        inputHandler.question(
+        rl.question(
           "Set long break duration (in minutes):",
           (longBreak) => {
             longBreakDuration = parseInt(longBreak) * 60;
@@ -273,63 +273,16 @@ function displayStatistics() {
 }
 
 // Command handling
-inputHandler = readline.createInterface({
+rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 //
 function handleCommands() {
-  inputHandler.on("line", (input) => {
-    switch (input.trim()) {
+  rl.on("line", (input) => {
+    switch (input) {
       case "1":
         startPomodoroCycle();
-        break;
-      case "4":
-        stopTimer();
-        console.log("----Available options----")
-        console.log("1. Start Pomodoro Cycle");
-        console.log("2. Pause Timer");
-        console.log("3. Resume Timer");
-        console.log("4. Stop Timer");
-        console.log("5. Reset Timer");
-        console.log("6. Set Custom Durations");
-        console.log("7. View Session History");
-        console.log("8. View Statistics");
-        console.log("9. Exit");
-        console.log("10. Help")
-        console.log("Please select an option")
-        break;
-      case "6":
-        setCustomTimers();
-        break;
-      case "8":
-        displayStatistics();
-        console.log("----Available options----")
-        console.log("1. Start Pomodoro Cycle");
-        console.log("2. Pause Timer");
-        console.log("3. Resume Timer");
-        console.log("4. Stop Timer");
-        console.log("5. Reset Timer");
-        console.log("6. Set Custom Durations");
-        console.log("7. View Session History");
-        console.log("8. View Statistics");
-        console.log("9. Exit");
-        console.log("10. Help")
-        console.log("Please select an option")
-        break;
-      case "10":
-        console.log("----Available options----")
-        console.log("1. Start Pomodoro Cycle");
-        console.log("2. Pause Timer");
-        console.log("3. Resume Timer");
-        console.log("4. Stop Timer");
-        console.log("5. Reset Timer");
-        console.log("6. Set Custom Durations");
-        console.log("7. View Session History");
-        console.log("8. View Statistics");
-        console.log("9. Exit");
-        console.log("10. Help")
-        console.log("Please select an option")
         break;
       case "2":
         pauseTimer();
@@ -337,33 +290,48 @@ function handleCommands() {
       case "3":
         resumeTimer();
         break;
+      case "4":
+        stopTimer();
+        displayOptions();
+        break;
       case "5":
         resetTimer();
+        break;
+      case "6":
+        setCustomTimers();
         break;
       case "7":
         viewHistory();
         break;
+      case "8":
+        displayStatistics();
+        break;
       case "9":
-        inputHandler.close();
+        rl.close();
         process.exit();
+        break;
+      case "10":
+        displayOptions();
+        break;
       default:
-        console.log(
-          "\nUnknown option. press 10 to see all available options."
-        );
+        console.log("\nUnknown option. Press 10 to see all available options.");
     }
   });
 }
 
-console.log("\n--- Pomodoro Timer ---");
-console.log("1. Start Pomodoro Cycle");
-console.log("2. Pause Timer");
-console.log("3. Resume Timer");
-console.log("4. Stop Timer");
-console.log("5. Reset Timer");
-console.log("6. Set Custom Durations");
-console.log("7. View Session History");
-console.log("8. View Statistics");
-console.log("9. Exit");
-console.log("10. Help")
-console.log("Please select an option")
+function displayOptions() {
+  console.log("\n----Pomodoro Timer----");
+  console.log("1. Start Pomodoro Cycle");
+  console.log("2. Pause Timer");
+  console.log("3. Resume Timer");
+  console.log("4. Stop Timer");
+  console.log("5. Reset Timer");
+  console.log("6. Set Custom Durations");
+  console.log("7. View Session History");
+  console.log("8. View Statistics");
+  console.log("9. Exit");
+  console.log("10. Help");
+  console.log("Please select an option:");
+}
+displayOptions();
 handleCommands();
