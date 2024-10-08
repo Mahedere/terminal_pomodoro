@@ -16,36 +16,25 @@ A simple terminal-based Pomodoro timer application built with Node.js. This appl
 ## Installation
 
 1. **Clone the repository** to your local machine:
-
-   ```bash
-   git clone https://github.com/yourusername/terminal_pomodoro.git
-Navigate to the project directory:
-
-bash
-Copy code
-cd terminal_pomodoro
-Install the necessary packages:
-
-bash
-Copy code
+2. Navigate to the project directory:
+3.Copy code
+ cd terminal_pomodoro
+4.Install the necessary packages:
 npm install node-notifier
-Usage
+5.Usage
 Start the application:
-
-bash
-Copy code
 node timer.js
-Follow the prompts and use the available commands:
-
-start: Start the Pomodoro cycle
-s: Stop the current timer
-set: Set custom durations for work, short break, and long break
-st: Display session statistics
-h: View session history
-p: Pause the timer
-r: Resume the timer
-re: Reset the Pomodoro cycle and statistics
-help: View the list of available commands
-q: Quit the application
-Session History
+Follow the prompts and use the available options:
+----Available options----
+1. Start Pomodoro Cycle"
+2. Pause Timer
+3. Resume Timer
+4. Stop Timer
+5. Reset Timer
+6. Set Custom Durations
+7. View Session History
+8. View Statistics
+9. Exit
+10. Help
+6.Session History
 The session history will be saved in the pomodoro_history.txt file. This file is included in the .gitignore, so it will not be tracked by Git.
